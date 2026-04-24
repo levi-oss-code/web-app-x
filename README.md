@@ -8,3 +8,4 @@ Monorepo scaffold for an AI SaaS app with:
 - OpenRouter model integration (backend only)
 
 See `docs/api-contract.md` for endpoint contracts.
+Use `docs/deployment-plan.md` for production deployment steps and env templates.

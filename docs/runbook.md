@@ -10,6 +10,12 @@
 6. Run backend: `pnpm dev:backend`.
 7. Run frontend: `pnpm dev`.
 
+## Production setup templates
+
+- Backend template: `apps/backend/.env.production.example`
+- Frontend template: `apps/frontend/.env.production.example`
+- Deployment sequence: `docs/deployment-plan.md`
+
 ## Verification
 
 - `GET /api/health` should return `success: true`.
