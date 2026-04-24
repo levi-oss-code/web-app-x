@@ -4,6 +4,8 @@ export interface AuthUser {
   id: string;
   email: string;
   created_at: string;
+  plan: 'free' | 'pro';
+  monthly_generation_limit: number;
 }
 
 export interface AuthResponse {

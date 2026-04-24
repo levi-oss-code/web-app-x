@@ -16,7 +16,10 @@ db.exec(`
     id text primary key,
     email text not null unique,
     password_hash text not null,
-    created_at text not null
+    created_at text not null,
+    plan text not null default 'free',
+    monthly_generation_limit integer not null default 20,
+    stripe_customer_id text
   );
 
   create table if not exists generation_tasks (
@@ -31,3 +34,20 @@ db.exec(`
   create index if not exists generation_tasks_user_created_idx
     on generation_tasks (user_id, created_at desc);
 `);
+
+function hasColumn(tableName: string, columnName: string): boolean {
+  const rows = db.prepare(`pragma table_info(${tableName})`).all() as Array<{ name: string }>;
+  return rows.some((row) => row.name === columnName);
+}
+
+if (!hasColumn('users', 'plan')) {
+  db.exec("alter table users add column plan text not null default 'free';");
+}
+
+if (!hasColumn('users', 'monthly_generation_limit')) {
+  db.exec('alter table users add column monthly_generation_limit integer not null default 20;');
+}
+
+if (!hasColumn('users', 'stripe_customer_id')) {
+  db.exec('alter table users add column stripe_customer_id text;');
+}

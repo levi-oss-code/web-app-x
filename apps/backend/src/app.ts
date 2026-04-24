@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
+import { billingRouter } from './modules/billing/billing.routes.js';
 import { generationRouter } from './modules/generation/generation.routes.js';
 import { healthRouter } from './modules/health/health.routes.js';
 
@@ -23,6 +24,7 @@ export function createApp() {
 
   app.use('/api/health', healthRouter);
   app.use('/api/auth', authRouter);
+  app.use('/api/billing', billingRouter);
   app.use('/api/generations', generationRouter);
 
   app.use(errorHandler);

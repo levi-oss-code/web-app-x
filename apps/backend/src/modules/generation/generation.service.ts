@@ -2,6 +2,7 @@ import { HttpError } from '../../lib/http-error.js';
 import { logger } from '../../lib/logger.js';
 import { createGenerationRequestSchema, listGenerationsQuerySchema } from '@web-app-x/shared-contracts';
 import {
+  countUserGenerationsInMonth,
   createPendingGeneration,
   deleteGeneration,
   getGenerationById,
@@ -15,6 +16,16 @@ export async function createGenerationForUser(user: AuthUser, body: unknown) {
   const parsed = createGenerationRequestSchema.safeParse(body);
   if (!parsed.success) {
     throw new HttpError(400, 'VALIDATION_ERROR', 'Invalid generation request', parsed.error.flatten());
+  }
+  if (user.plan === 'free') {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const usage = await countUserGenerationsInMonth(user.id, currentMonth);
+    if (usage >= user.monthly_generation_limit) {
+      throw new HttpError(402, 'PLAN_LIMIT_REACHED', 'Free plan generation limit reached', {
+        usage,
+        limit: user.monthly_generation_limit,
+      });
+    }
   }
   const pending = await createPendingGeneration(user.id, parsed.data.original_input);
   try {

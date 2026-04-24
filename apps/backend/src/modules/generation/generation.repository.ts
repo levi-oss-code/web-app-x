@@ -81,3 +81,12 @@ export async function deleteGeneration(userId: string, id: string): Promise<bool
     .run(id, userId);
   return result.changes > 0;
 }
+
+export async function countUserGenerationsInMonth(userId: string, isoMonthPrefix: string): Promise<number> {
+  const row = db
+    .prepare(
+      "select count(*) as count from generation_tasks where user_id = ? and created_at >= ? and status in ('pending', 'completed', 'failed')",
+    )
+    .get(userId, `${isoMonthPrefix}-01`) as { count: number };
+  return row.count;
+}

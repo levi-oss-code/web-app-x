@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { clearAuthCookie, setAuthCookie } from '../../lib/auth-cookie.js';
+import { env } from '../../config/env.js';
 import { db } from '../../lib/db.js';
 import { signAccessToken } from '../../lib/token.js';
 import { requireAuth } from '../../middleware/auth.js';
@@ -40,11 +41,13 @@ authRouter.post('/signup', (req: Request, res) => {
     id: randomUUID(),
     email: parsed.data.email.toLowerCase(),
     created_at: new Date().toISOString(),
+    plan: 'free' as const,
+    monthly_generation_limit: env.FREE_MONTHLY_GENERATION_LIMIT,
   };
   const passwordHash = bcrypt.hashSync(parsed.data.password, 10);
   db.prepare(
-    'insert into users (id, email, password_hash, created_at) values (?, ?, ?, ?)',
-  ).run(user.id, user.email, passwordHash, user.created_at);
+    'insert into users (id, email, password_hash, created_at, plan, monthly_generation_limit) values (?, ?, ?, ?, ?, ?)',
+  ).run(user.id, user.email, passwordHash, user.created_at, user.plan, user.monthly_generation_limit);
 
   const access_token = signAccessToken({ id: user.id, email: user.email });
   setAuthCookie(res, access_token);
@@ -65,9 +68,18 @@ authRouter.post('/signin', (req: Request, res) => {
   }
 
   const userRow = db
-    .prepare('select id, email, password_hash, created_at from users where email = ?')
+    .prepare(
+      'select id, email, password_hash, created_at, plan, monthly_generation_limit from users where email = ?',
+    )
     .get(parsed.data.email.toLowerCase()) as
-    | { id: string; email: string; password_hash: string; created_at: string }
+    | {
+        id: string;
+        email: string;
+        password_hash: string;
+        created_at: string;
+        plan: 'free' | 'pro';
+        monthly_generation_limit: number;
+      }
     | undefined;
 
   if (!userRow || !bcrypt.compareSync(parsed.data.password, userRow.password_hash)) {
@@ -87,6 +99,8 @@ authRouter.post('/signin', (req: Request, res) => {
         id: userRow.id,
         email: userRow.email,
         created_at: userRow.created_at,
+        plan: userRow.plan,
+        monthly_generation_limit: userRow.monthly_generation_limit,
       },
     },
   });
@@ -103,8 +117,16 @@ authRouter.post('/signout', (_req, res) => {
 authRouter.get('/me', requireAuth, (req, res) => {
   const authedReq = req as AuthedRequest;
   const userRow = db
-    .prepare('select id, email, created_at from users where id = ?')
-    .get(authedReq.authUser.id) as { id: string; email: string; created_at: string } | undefined;
+    .prepare('select id, email, created_at, plan, monthly_generation_limit from users where id = ?')
+    .get(authedReq.authUser.id) as
+    | {
+        id: string;
+        email: string;
+        created_at: string;
+        plan: 'free' | 'pro';
+        monthly_generation_limit: number;
+      }
+    | undefined;
   if (!userRow) {
     res.status(404).json({
       success: false,
@@ -119,6 +141,8 @@ authRouter.get('/me', requireAuth, (req, res) => {
         id: userRow.id,
         email: userRow.email,
         created_at: userRow.created_at,
+        plan: userRow.plan,
+        monthly_generation_limit: userRow.monthly_generation_limit,
       },
     },
   });

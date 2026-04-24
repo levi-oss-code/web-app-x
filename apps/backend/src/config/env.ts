@@ -10,6 +10,9 @@ const envSchema = z.object({
   OPENROUTER_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
   JWT_SECRET: z.string().min(16).default('dev-jwt-secret-change-in-production'),
   SQLITE_DB_PATH: z.string().default('./data/app.db'),
+  FREE_MONTHLY_GENERATION_LIMIT: z.coerce.number().int().positive().default(20),
+  STRIPE_PAYMENT_LINK_URL: z.string().url().optional(),
+  BILLING_ADMIN_TOKEN: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

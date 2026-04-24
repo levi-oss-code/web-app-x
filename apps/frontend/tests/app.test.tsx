@@ -17,6 +17,10 @@ const historyApiMocks = vi.hoisted(() => ({
   listHistory: vi.fn(),
   deleteHistoryItem: vi.fn(),
 }));
+const billingApiMocks = vi.hoisted(() => ({
+  getBillingUsage: vi.fn(),
+  createCheckoutSession: vi.fn(),
+}));
 
 vi.mock('../src/features/auth/auth.api.js', () => ({
   getMe: authApiMocks.getMe,
@@ -32,6 +36,10 @@ vi.mock('../src/features/generation/generation.api.js', () => ({
 vi.mock('../src/features/history/history.api.js', () => ({
   listHistory: historyApiMocks.listHistory,
   deleteHistoryItem: historyApiMocks.deleteHistoryItem,
+}));
+vi.mock('../src/features/billing/billing.api.js', () => ({
+  getBillingUsage: billingApiMocks.getBillingUsage,
+  createCheckoutSession: billingApiMocks.createCheckoutSession,
 }));
 
 function makeGeneration(overrides: Partial<GenerationTask> = {}): GenerationTask {
@@ -64,6 +72,13 @@ describe('App', () => {
       id: 'user-1',
       email: 'member@example.com',
       created_at: new Date().toISOString(),
+      plan: 'free',
+      monthly_generation_limit: 20,
+    });
+    billingApiMocks.getBillingUsage.mockResolvedValueOnce({
+      plan: 'free',
+      monthly_generation_limit: 20,
+      used_this_month: 0,
     });
     let rejectHistory: ((reason?: unknown) => void) | undefined;
     historyApiMocks.listHistory.mockImplementationOnce(
@@ -86,6 +101,13 @@ describe('App', () => {
       id: 'user-1',
       email: 'member@example.com',
       created_at: new Date().toISOString(),
+      plan: 'free',
+      monthly_generation_limit: 20,
+    });
+    billingApiMocks.getBillingUsage.mockResolvedValueOnce({
+      plan: 'free',
+      monthly_generation_limit: 20,
+      used_this_month: 0,
     });
     historyApiMocks.listHistory.mockResolvedValueOnce([]);
     generationApiMocks.createGeneration.mockResolvedValueOnce(
