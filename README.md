@@ -1,0 +1,10 @@
+# Web App X
+
+Monorepo scaffold for an AI SaaS app with:
+
+- React + Vite frontend
+- Express backend
+- SQLite auth/database
+- OpenRouter model integration (backend only)
+
+See `docs/api-contract.md` for endpoint contracts.

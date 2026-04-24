@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "ignorePatterns": ["dist/", "build/", "node_modules/"],
+  "env": {
+    "es2022": true,
+    "node": true,
+    "browser": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@web-app-x/shared-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"No lint rules configured yet for shared-contracts\"",
+    "test": "echo \"No tests yet for shared-contracts\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  }
+}
