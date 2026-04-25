@@ -79,6 +79,7 @@ describe('App', () => {
       plan: 'free',
       monthly_generation_limit: 20,
       used_this_month: 0,
+      can_upgrade: true,
     });
     let rejectHistory: ((reason?: unknown) => void) | undefined;
     historyApiMocks.listHistory.mockImplementationOnce(
@@ -108,6 +109,7 @@ describe('App', () => {
       plan: 'free',
       monthly_generation_limit: 20,
       used_this_month: 0,
+      can_upgrade: true,
     });
     historyApiMocks.listHistory.mockResolvedValueOnce([]);
     generationApiMocks.createGeneration.mockResolvedValueOnce(

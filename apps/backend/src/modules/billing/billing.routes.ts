@@ -17,12 +17,16 @@ billingRouter.get(
     const authedReq = req as AuthedRequest;
     const currentMonth = new Date().toISOString().slice(0, 7);
     const usage = await countUserGenerationsInMonth(authedReq.authUser.id, currentMonth);
+    const canUpgrade = Boolean(
+      (env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_ID) || env.STRIPE_PAYMENT_LINK_URL,
+    );
     res.json({
       success: true,
       data: {
         plan: authedReq.authUser.plan,
         monthly_generation_limit: authedReq.authUser.monthly_generation_limit,
         used_this_month: usage,
+        can_upgrade: canUpgrade,
       },
     });
   }),

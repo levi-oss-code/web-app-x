@@ -4,6 +4,7 @@ export interface BillingUsage {
   plan: 'free' | 'pro';
   monthly_generation_limit: number;
   used_this_month: number;
+  can_upgrade: boolean;
 }
 
 export async function getBillingUsage(): Promise<BillingUsage> {
