@@ -33,6 +33,14 @@ db.exec(`
 
   create index if not exists generation_tasks_user_created_idx
     on generation_tasks (user_id, created_at desc);
+
+  create table if not exists waitlist_leads (
+    id text primary key,
+    email text not null unique,
+    note text,
+    source text not null default 'landing',
+    created_at text not null
+  );
 `);
 
 function hasColumn(tableName: string, columnName: string): boolean {

@@ -92,6 +92,23 @@ describe('API integration', () => {
     expect(response.body.success).toBe(false);
   });
 
+  it('captures waitlist leads and de-duplicates by email', async () => {
+    const first = await request(app).post('/api/leads').send({
+      email: 'lead@example.com',
+      note: 'Need better prompt templates',
+      source: 'landing-test',
+    });
+    expect(first.status).toBe(201);
+    expect(first.body.data.already_exists).toBe(false);
+
+    const second = await request(app).post('/api/leads').send({
+      email: 'LEAD@example.com',
+      note: 'same user second try',
+    });
+    expect(second.status).toBe(200);
+    expect(second.body.data.already_exists).toBe(true);
+  });
+
   it('promotes user to pro when Stripe checkout webhook succeeds', async () => {
     const signupResponse = await request(app).post('/api/auth/signup').send({
       email: 'billing@example.com',

@@ -8,6 +8,7 @@ import { authRouter } from './modules/auth/auth.routes.js';
 import { billingRouter } from './modules/billing/billing.routes.js';
 import { generationRouter } from './modules/generation/generation.routes.js';
 import { healthRouter } from './modules/health/health.routes.js';
+import { leadsRouter } from './modules/leads/leads.routes.js';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
   app.use(express.json());
 
   app.use('/api/health', healthRouter);
+  app.use('/api/leads', leadsRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/billing', billingRouter);
   app.use('/api/generations', generationRouter);
