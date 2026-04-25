@@ -11,7 +11,11 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(16).default('dev-jwt-secret-change-in-production'),
   SQLITE_DB_PATH: z.string().default('./data/app.db'),
   FREE_MONTHLY_GENERATION_LIMIT: z.coerce.number().int().positive().default(20),
+  PRO_MONTHLY_GENERATION_LIMIT: z.coerce.number().int().positive().default(100000),
   STRIPE_PAYMENT_LINK_URL: z.string().url().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_ID: z.string().optional(),
   BILLING_ADMIN_TOKEN: z.string().optional(),
 });
 

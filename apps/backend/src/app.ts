@@ -20,6 +20,7 @@ export function createApp() {
     }),
   );
   app.use(cookieParser());
+  app.use('/api/billing/webhooks/stripe', express.raw({ type: 'application/json' }));
   app.use(express.json());
 
   app.use('/api/health', healthRouter);

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import request from 'supertest';
+import Stripe from 'stripe';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 let app: import('express').Express;
@@ -15,6 +16,8 @@ describe('API integration', () => {
     process.env.SQLITE_DB_PATH = dbPath;
     process.env.JWT_SECRET = 'test-jwt-secret-12345';
     process.env.FRONTEND_ORIGIN = 'http://localhost:5173';
+    process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_123';
 
     const appModule = await import('../src/app.js');
     app = appModule.createApp();
@@ -87,5 +90,46 @@ describe('API integration', () => {
     const response = await request(app).get('/api/generations');
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
+  });
+
+  it('promotes user to pro when Stripe checkout webhook succeeds', async () => {
+    const signupResponse = await request(app).post('/api/auth/signup').send({
+      email: 'billing@example.com',
+      password: 'password123',
+    });
+    expect(signupResponse.status).toBe(201);
+    const userId = String(signupResponse.body.data.user.id);
+
+    const eventPayload = JSON.stringify({
+      id: 'evt_test_checkout_completed',
+      object: 'event',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_test_123',
+          object: 'checkout.session',
+          metadata: { user_id: userId },
+          customer: 'cus_test_123',
+        },
+      },
+    });
+    const signatureHeader = Stripe.webhooks.generateTestHeaderString({
+      payload: eventPayload,
+      secret: 'whsec_test_123',
+    });
+
+    const webhookResponse = await request(app)
+      .post('/api/billing/webhooks/stripe')
+      .set('stripe-signature', signatureHeader)
+      .set('Content-Type', 'application/json')
+      .send(eventPayload);
+    expect(webhookResponse.status).toBe(200);
+    expect(webhookResponse.body.received).toBe(true);
+
+    const updatedUser = db
+      .prepare('select plan, stripe_customer_id from users where id = ?')
+      .get(userId) as { plan: string; stripe_customer_id: string | null } | undefined;
+    expect(updatedUser?.plan).toBe('pro');
+    expect(updatedUser?.stripe_customer_id).toBe('cus_test_123');
   });
 });
